@@ -179,6 +179,41 @@ func BenchmarkAddCallerHook(b *testing.B) {
 	})
 }
 
+func BenchmarkAddStack(b *testing.B) {
+	logger := New(
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(NewProductionConfig().EncoderConfig),
+			&ztest.Discarder{},
+			InfoLevel,
+		),
+		AddStacktrace(InfoLevel),
+	)
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			logger.Info("foo")
+		}
+	})
+}
+
+func BenchmarkAddCallerAndStack(b *testing.B) {
+	logger := New(
+		zapcore.NewCore(
+			zapcore.NewJSONEncoder(NewProductionConfig().EncoderConfig),
+			&ztest.Discarder{},
+			InfoLevel,
+		),
+		AddCaller(),
+		AddStacktrace(InfoLevel),
+	)
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			logger.Info("foo")
+		}
+	})
+}
+
 func Benchmark10Fields(b *testing.B) {
 	withBenchedLogger(b, func(log *Logger) {
 		log.Info("Ten fields, passed at the log site.",
