@@ -21,6 +21,7 @@
 package zap
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -173,13 +174,13 @@ func (log *Logger) With(fields ...Field) *Logger {
 // is enabled. It's a completely optional optimization; in high-performance
 // applications, Check can help avoid allocating a slice to hold fields.
 func (log *Logger) Check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
-	return log.check(lvl, msg)
+	return log.check(nil, lvl, msg)
 }
 
 // Debug logs a message at DebugLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (log *Logger) Debug(msg string, fields ...Field) {
-	if ce := log.check(DebugLevel, msg); ce != nil {
+	if ce := log.check(nil, DebugLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -187,7 +188,7 @@ func (log *Logger) Debug(msg string, fields ...Field) {
 // Info logs a message at InfoLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (log *Logger) Info(msg string, fields ...Field) {
-	if ce := log.check(InfoLevel, msg); ce != nil {
+	if ce := log.check(nil, InfoLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -195,7 +196,7 @@ func (log *Logger) Info(msg string, fields ...Field) {
 // Warn logs a message at WarnLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (log *Logger) Warn(msg string, fields ...Field) {
-	if ce := log.check(WarnLevel, msg); ce != nil {
+	if ce := log.check(nil, WarnLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -203,7 +204,7 @@ func (log *Logger) Warn(msg string, fields ...Field) {
 // Error logs a message at ErrorLevel. The message includes any fields passed
 // at the log site, as well as any fields accumulated on the logger.
 func (log *Logger) Error(msg string, fields ...Field) {
-	if ce := log.check(ErrorLevel, msg); ce != nil {
+	if ce := log.check(nil, ErrorLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -215,7 +216,7 @@ func (log *Logger) Error(msg string, fields ...Field) {
 // "development panic"). This is useful for catching errors that are
 // recoverable, but shouldn't ever happen.
 func (log *Logger) DPanic(msg string, fields ...Field) {
-	if ce := log.check(DPanicLevel, msg); ce != nil {
+	if ce := log.check(nil, DPanicLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -225,7 +226,7 @@ func (log *Logger) DPanic(msg string, fields ...Field) {
 //
 // The logger then panics, even if logging at PanicLevel is disabled.
 func (log *Logger) Panic(msg string, fields ...Field) {
-	if ce := log.check(PanicLevel, msg); ce != nil {
+	if ce := log.check(nil, PanicLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -236,7 +237,7 @@ func (log *Logger) Panic(msg string, fields ...Field) {
 // The logger then calls os.Exit(1), even if logging at FatalLevel is
 // disabled.
 func (log *Logger) Fatal(msg string, fields ...Field) {
-	if ce := log.check(FatalLevel, msg); ce != nil {
+	if ce := log.check(nil, FatalLevel, msg); ce != nil {
 		ce.Write(fields...)
 	}
 }
@@ -257,7 +258,7 @@ func (log *Logger) clone() *Logger {
 	return &copy
 }
 
-func (log *Logger) check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
+func (log *Logger) check(ctx context.Context, lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	// check must always be called directly by a method in the Logger interface
 	// (e.g., Check, Info, Fatal).
 	const callerSkipOffset = 2
@@ -271,6 +272,7 @@ func (log *Logger) check(lvl zapcore.Level, msg string) *zapcore.CheckedEntry {
 	// Create basic checked entry thru the core; this will be non-nil if the
 	// log message will actually be written somewhere.
 	ent := zapcore.Entry{
+		Ctx:        ctx,
 		LoggerName: log.name,
 		Time:       log.clock.Now(),
 		Level:      lvl,

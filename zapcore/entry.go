@@ -21,6 +21,7 @@
 package zapcore
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"strings"
@@ -144,6 +145,7 @@ func (ec EntryCaller) TrimmedPath() string {
 // Entries are pooled, so any functions that accept them MUST be careful not to
 // retain references to them.
 type Entry struct {
+	Ctx        context.Context
 	Level      Level
 	Time       time.Time
 	LoggerName string
