@@ -74,6 +74,12 @@ func (b *Buffer) AppendFloat(f float64, bitSize int) {
 	b.bs = strconv.AppendFloat(b.bs, f, 'f', -1, bitSize)
 }
 
+// AppendFloatWithPrecision appends a float with precision to the underlying buffer. It doesn't quote NaN
+// or +/- Inf.
+func (b *Buffer) AppendFloatWithPrecision(f float64, prec int, bitSize int) {
+	b.bs = strconv.AppendFloat(b.bs, f, 'f', prec, bitSize)
+}
+
 // Len returns the length of the underlying byte slice.
 func (b *Buffer) Len() int {
 	return len(b.bs)
