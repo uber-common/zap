@@ -142,6 +142,30 @@ core := zapcore.NewCore(
 logger := zap.New(core)
 ```
 
+### How to prettify JSON output?
+
+Debugging tons of JSON log lines can quickly become overwhelming. A quick solution
+is often to pipe everything into `jq`. That's left much to be desire, `jq` output
+still being very verbose and far from ideal.
+
+The `zap-pretty` CLI tool ([github.com/maoueh/zap-pretty](https://github.com/maoueh/zap-pretty), a
+community maintained package) has been created just for that. Simply pipe
+the output of your program into it and it will automatically pretty-print
+the JSON lines, in a nice format and with coloring as an added bonus (not
+visible in this example):
+
+```
+kubectl logs -f pod-name | zap-pretty
+[2018-12-10 17:06:24.101 UTC] INFO (main.go:45) doing some stuff {"count":2}
+...
+```
+
+It supports out of the box standard `zap.NewProductionConfig` and
+`zapdriver.NewProductionConfig` formats.
+
+Head down to [github.com/maoueh/zap-pretty](https://github.com/maoueh/zap-pretty)
+package for installation instructions and all usage details.
+
 ## Extensions
 
 We'd love to support every logging need within zap itself, but we're only
