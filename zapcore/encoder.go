@@ -333,6 +333,13 @@ type EncoderConfig struct {
 	// Configures the field separator used by the console encoder. Defaults
 	// to tab.
 	ConsoleSeparator string `json:"consoleSeparator" yaml:"consoleSeparator"`
+	// If set to true, all numbers will be wrapped by double quotation marks.
+	// This is usally useful in JSON logging to make sure that you don't lose
+	// precision on number fields during log ingester's json decoding process.
+	// NOTE: currently this only works for top level fields, e.g.
+	// Int64("key", 123) or sugared With("key", 456). It doesn't work with
+	// reflected fields like Reflect("key", []int{1, 2, 3}).
+	NumbersAsStrings bool `json:"numbersAsStrings" yaml:"numbersAsStrings"`
 }
 
 // ObjectEncoder is a strongly-typed, encoding-agnostic interface for adding a

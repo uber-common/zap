@@ -248,7 +248,13 @@ func (enc *jsonEncoder) AppendDuration(val time.Duration) {
 
 func (enc *jsonEncoder) AppendInt64(val int64) {
 	enc.addElementSeparator()
+	if enc.EncoderConfig.NumbersAsStrings {
+		enc.buf.AppendByte('"')
+	}
 	enc.buf.AppendInt(val)
+	if enc.EncoderConfig.NumbersAsStrings {
+		enc.buf.AppendByte('"')
+	}
 }
 
 func (enc *jsonEncoder) AppendReflected(val interface{}) error {
@@ -289,7 +295,13 @@ func (enc *jsonEncoder) AppendTime(val time.Time) {
 
 func (enc *jsonEncoder) AppendUint64(val uint64) {
 	enc.addElementSeparator()
+	if enc.EncoderConfig.NumbersAsStrings {
+		enc.buf.AppendByte('"')
+	}
 	enc.buf.AppendUint(val)
+	if enc.EncoderConfig.NumbersAsStrings {
+		enc.buf.AppendByte('"')
+	}
 }
 
 func (enc *jsonEncoder) AddComplex64(k string, v complex64) { enc.AddComplex128(k, complex128(v)) }
@@ -454,7 +466,13 @@ func (enc *jsonEncoder) appendFloat(val float64, bitSize int) {
 	case math.IsInf(val, -1):
 		enc.buf.AppendString(`"-Inf"`)
 	default:
+		if enc.EncoderConfig.NumbersAsStrings {
+			enc.buf.AppendByte('"')
+		}
 		enc.buf.AppendFloat(val, bitSize)
+		if enc.EncoderConfig.NumbersAsStrings {
+			enc.buf.AppendByte('"')
+		}
 	}
 }
 
