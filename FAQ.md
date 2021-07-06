@@ -141,6 +141,28 @@ core := zapcore.NewCore(
 )
 logger := zap.New(core)
 ```
+Another way to manage log files by time rolling.
+[zaplogman](https://github.com/wk30/zaplogman) as a `zapcore`
+
+```go
+man := &zaplogman.Logman{
+    Filename:   "./log/foo.log",
+    MaxBackups: 10,
+    MaxAge:     5, // days
+    Compress:   true,
+    Timing:     zaplogman.HOURLY,
+    Level:      zapcore.DebugLevel,
+    SelfOutput: true,
+}
+cfg := zap.NewProductionEncoderConfig()
+cfg.TimeKey = "time"
+cfg.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
+core := zaplogman.NewCore(
+    zapcore.NewJSONEncoder(cfg),
+    man,
+)
+logger = zap.New(core)
+```
 
 ## Extensions
 
