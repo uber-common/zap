@@ -44,6 +44,15 @@ func makeCountingHook() (func(zapcore.Entry) error, *atomic.Int64) {
 	return h, count
 }
 
+func makeCountingHookWithFields() (func(zapcore.Entry, []zapcore.Field) error, *atomic.Int64) {
+	count := &atomic.Int64{}
+	h := func(zapcore.Entry, []zapcore.Field) error {
+		count.Inc()
+		return nil
+	}
+	return h, count
+}
+
 func TestLoggerAtomicLevel(t *testing.T) {
 	// Test that the dynamic level applies to all ancestors and descendants.
 	dl := NewAtomicLevel()
@@ -499,6 +508,15 @@ func TestLoggerIncreaseLevel(t *testing.T) {
 func TestLoggerHooks(t *testing.T) {
 	hook, seen := makeCountingHook()
 	withLogger(t, DebugLevel, opts(Hooks(hook)), func(logger *Logger, logs *observer.ObservedLogs) {
+		logger.Debug("")
+		logger.Info("")
+	})
+	assert.Equal(t, int64(2), seen.Load(), "Hook saw an unexpected number of logs.")
+}
+
+func TestLoggerHooksWithFields(t *testing.T) {
+	hook, seen := makeCountingHookWithFields()
+	withLogger(t, DebugLevel, opts(HooksWithFields(hook)), func(logger *Logger, logs *observer.ObservedLogs) {
 		logger.Debug("")
 		logger.Info("")
 	})

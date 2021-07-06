@@ -58,6 +58,13 @@ func Hooks(hooks ...func(zapcore.Entry) error) Option {
 	})
 }
 
+// HooksWithFields similiar with Hooks, but hook funcs can access fields
+func HooksWithFields(hooks ...func(zapcore.Entry, []zapcore.Field) error) Option {
+	return optionFunc(func(log *Logger) {
+		log.core = zapcore.RegisterHooksWithFields(log.core, hooks...)
+	})
+}
+
 // Fields adds fields to the Logger.
 func Fields(fs ...Field) Option {
 	return optionFunc(func(log *Logger) {
