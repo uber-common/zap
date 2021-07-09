@@ -333,6 +333,8 @@ type EncoderConfig struct {
 	// Configures the field separator used by the console encoder. Defaults
 	// to tab.
 	ConsoleSeparator string `json:"consoleSeparator" yaml:"consoleSeparator"`
+	// Sets whether the console encoder will ignore json escaped strings.
+	ConsoleIgnoreJSONEscapes bool `json:"consoleIgnoreJSONEscapes" yaml:"consoleIgnoreJSONEscapes"`
 }
 
 // ObjectEncoder is a strongly-typed, encoding-agnostic interface for adding a

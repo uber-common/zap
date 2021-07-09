@@ -134,12 +134,12 @@ func (c consoleEncoder) EncodeEntry(ent Entry, fields []Field) (*buffer.Buffer, 
 }
 
 func (c consoleEncoder) writeContext(line *buffer.Buffer, extra []Field) {
-	context := c.jsonEncoder.Clone().(*jsonEncoder)
+	context := c.Clone().(consoleEncoder)
 	defer func() {
 		// putJSONEncoder assumes the buffer is still used, but we write out the buffer so
 		// we can free it.
 		context.buf.Free()
-		putJSONEncoder(context)
+		putJSONEncoder(context.jsonEncoder)
 	}()
 
 	addFields(context, extra)
@@ -158,4 +158,35 @@ func (c consoleEncoder) addSeparatorIfNecessary(line *buffer.Buffer) {
 	if line.Len() > 0 {
 		line.AppendString(c.ConsoleSeparator)
 	}
+}
+
+func (c consoleEncoder) AddString(key, value string) {
+	c.addKey(key)
+	c.AppendString(value)
+}
+
+func (c consoleEncoder) addKey(key string) {
+	c.addElementSeparator()
+	c.buf.AppendByte('"')
+	if c.EncoderConfig.ConsoleIgnoreJSONEscapes {
+		c.buf.AppendString(key)
+		} else {
+		c.safeAddString(key)
+	}
+	c.buf.AppendByte('"')
+	c.buf.AppendByte(':')
+	if c.spaced {
+		c.buf.AppendByte(' ')
+	}
+}
+
+func (c consoleEncoder) AppendString(val string) {
+	c.addElementSeparator()
+	c.buf.AppendByte('"')
+	if c.EncoderConfig.ConsoleIgnoreJSONEscapes {
+		c.buf.AppendString(val)
+		} else {
+		c.safeAddString(val)
+	}
+	c.buf.AppendByte('"')
 }
